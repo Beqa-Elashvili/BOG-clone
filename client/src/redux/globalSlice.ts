@@ -2,10 +2,12 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface InitialValues {
   isUser: boolean;
+  isRegisterForm: boolean;
 }
 
 const initialState: InitialValues = {
   isUser: false,
+  isRegisterForm: false,
 };
 
 export const globalSlice = createSlice({
@@ -15,9 +17,12 @@ export const globalSlice = createSlice({
     setIsUser: (state, action: PayloadAction<boolean>) => {
       state.isUser = action.payload;
     },
+    setIsRegisterForm: (state, action: PayloadAction<boolean>) => {
+      state.isRegisterForm = action.payload;
+    },
   },
 });
 
-export const { setIsUser } = globalSlice.actions;
+export const { setIsUser, setIsRegisterForm } = globalSlice.actions;
 
 export default globalSlice.reducer;
