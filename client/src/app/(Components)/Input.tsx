@@ -5,15 +5,17 @@ interface InputProps {
   type?: string;
   label?: string;
   value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-function Input({ label, type, name, value }: InputProps) {
+function Input({ label, type, name, value, onChange }: InputProps) {
   return (
     <div className="w-full relative bg-gray-800 rounded-lg pt-4 px-2">
       <input
         value={value}
         name={name}
         type={type}
+        onChange={onChange}
         className="w-full pt-1 pb-1 text-sm inset-0 bg-gray-800 rounded-lg focus:outline-none"
       />
       <label

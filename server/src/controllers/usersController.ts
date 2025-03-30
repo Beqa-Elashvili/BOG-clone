@@ -99,6 +99,36 @@ export const loginUser = async (req: Request, res: Response): Promise<any> => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+export const getUserByEmail = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { email } = req.params;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const { password, ...userData } = user;
+
+    return res.status(200).json(userData);
+  } catch (error) {
+    console.error("Error retrieving user by email:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 export const authenticateToken = (
   req: Request,
   res: Response,

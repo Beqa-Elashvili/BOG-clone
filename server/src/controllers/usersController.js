@@ -8,11 +8,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authenticateToken = exports.loginUser = exports.createUser = void 0;
+exports.authenticateToken = exports.getUserByEmail = exports.loginUser = exports.createUser = void 0;
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -98,6 +109,29 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.loginUser = loginUser;
+const getUserByEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = req.params;
+    if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+    }
+    try {
+        const user = yield prisma_1.default.user.findUnique({
+            where: {
+                email,
+            },
+        });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        const { password } = user, userData = __rest(user, ["password"]);
+        return res.status(200).json(userData);
+    }
+    catch (error) {
+        console.error("Error retrieving user by email:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+exports.getUserByEmail = getUserByEmail;
 const authenticateToken = (req, res, next) => {
     var _a;
     const token = (_a = req.headers["authorization"]) === null || _a === void 0 ? void 0 : _a.split(" ")[1]; // Extract token from 'Authorization: Bearer <token>'
