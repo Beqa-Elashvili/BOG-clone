@@ -1,14 +1,26 @@
 import axios from "axios";
 import { useAppDispatch } from "@/app/redux";
-import { setIsRegisterForm } from "@/redux/globalSlice";
+import { setIsUser } from "@/redux/globalSlice";
 
 const useGetProtectedData = () => {
-  const dispatch = useAppDispatch();
   const url = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const dispatch = useAppDispatch();
+
+  const handleUser = async (userId: string) => {
+    try {
+      const resp = await axios.get(`${url}/api/users/userId/${userId}`);
+      dispatch(setIsUser(resp.data));
+    } catch (error) {
+      console.log(error);
+      dispatch(setIsUser(null));
+    }
+  };
+
   const getProtectedData = async () => {
-    const token = localStorage.getItem("token"); 
+    const token = localStorage.getItem("token");
     if (!token) {
       console.log("No token found");
+      dispatch(setIsUser(null));
       return;
     }
     try {
@@ -17,10 +29,12 @@ const useGetProtectedData = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      dispatch(setIsRegisterForm(false));
-      console.log(response.data);
+      if (response.data.user) {
+        console.log("User found:", response.data.user);
+        await handleUser(response.data.user.userId);
+      }
+      console.log(response.data.user);
     } catch (error) {
-      dispatch(setIsRegisterForm(true));
       console.error("Error fetching protected data:", error);
     }
   };

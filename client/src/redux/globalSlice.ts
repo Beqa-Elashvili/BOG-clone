@@ -1,20 +1,20 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
+import { UserType } from "@/app/types/globaltypes";
 export interface InitialValues {
-  isUser: boolean;
+  isUser: UserType | null;
   isRegisterForm: boolean;
 }
 
 const initialState: InitialValues = {
-  isUser: false,
-  isRegisterForm: false,
+  isUser: null,
+  isRegisterForm: true,
 };
 
 export const globalSlice = createSlice({
   name: "global",
   initialState,
   reducers: {
-    setIsUser: (state, action: PayloadAction<boolean>) => {
+    setIsUser: (state, action: PayloadAction<UserType | null>) => {
       state.isUser = action.payload;
     },
     setIsRegisterForm: (state, action: PayloadAction<boolean>) => {

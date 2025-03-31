@@ -5,7 +5,6 @@ import Authentification from "./(auth)/authentification";
 
 export default function Home() {
   const url = process.env.NEXT_PUBLIC_API_BASE_URL;
-  // Form data state for user registration
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -26,7 +25,6 @@ export default function Home() {
   );
   const [loadingRegistration, setLoadingRegistration] = useState(false);
 
-  // Axios function for login
   const loginUser = async (email: string, password: string): Promise<any> => {
     try {
       console.log("gaehsva");
@@ -61,14 +59,6 @@ export default function Home() {
     }
 
     setLoadingLogin(false);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

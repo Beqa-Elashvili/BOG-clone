@@ -4,6 +4,7 @@ import {
   loginUser,
   getUserByEmail,
   authenticateToken,
+  getUserById,
 } from "../controllers/usersController";
 
 const router = Router();
@@ -11,6 +12,7 @@ const router = Router();
 router.post("/register", createUser);
 router.post("/login", loginUser);
 router.get("/email/:email", getUserByEmail);
+router.get("/userId/:userId", getUserById);
 
 router.get("/protectedRoute", authenticateToken, (req, res) => {
   res.json({

@@ -5,13 +5,15 @@ interface InputProps {
   type?: string;
   label?: string;
   value?: string;
+  maxLength?: number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-function Input({ label, type, name, value, onChange }: InputProps) {
+function Input({ label, type, name, value, onChange, maxLength }: InputProps) {
   return (
     <div className="w-full relative bg-gray-800 rounded-lg pt-4 px-2">
       <input
+        maxLength={maxLength}
         value={value}
         name={name}
         type={type}
