@@ -55,6 +55,8 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 name,
                 phoneNumber,
                 personalNumber,
+                balance: 55000,
+                points: 17500,
             },
         });
         const token = generateToken(user.id);
@@ -65,6 +67,8 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             phoneNumber: user.phoneNumber,
             personalNumber: user.personalNumber,
             createdAt: user.createdAt,
+            balance: user.balance,
+            points: user.points,
             token,
         });
     }
@@ -157,15 +161,15 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.getUserById = getUserById;
 const authenticateToken = (req, res, next) => {
     var _a;
-    const token = (_a = req.headers["authorization"]) === null || _a === void 0 ? void 0 : _a.split(" ")[1]; // Extract token from 'Authorization: Bearer <token>'
+    const token = (_a = req.headers["authorization"]) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
     if (!token) {
         res.status(403).json({ error: "Access denied, no token provided" });
-        return; // Ensure no further code is executed after sending the response
+        return;
     }
     jsonwebtoken_1.default.verify(token, JWT_SECRET, (err, user) => {
         if (err) {
             res.status(403).json({ error: "Invalid or expired token" });
-            return; // Ensure no further code is executed after sending the response
+            return;
         }
         req.user = user;
         next();

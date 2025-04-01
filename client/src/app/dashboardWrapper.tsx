@@ -1,21 +1,28 @@
 "use client";
 
 import React, { useEffect } from "react";
-import StoreProvider from "./redux";
+import StoreProvider, { useAppSelector } from "./redux";
+import Header from "./components/header";
+import Footer from "./components/footer";
 import useGetProtectedData from "./hooks/useGetPotectedData/useGetProtectedData";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { getProtectedData } = useGetProtectedData();
+  const { isUser } = useAppSelector((state) => state.global);
 
   useEffect(() => {
     getProtectedData();
   }, []);
 
   return (
-    <div className="w-full">
-      <main className="bg-black flex justify-center w-full h-screen min-h-screen">
-        <div className="max-w-[430px]">{children}</div>
-      </main>
+    <div className="w-full bg-black flex justify-center">
+      <div className="max-w-[430px] text-white  h-full min-h-screen">
+        <div className={`${isUser ? "block" : "hidden"}`}>
+          <Header />
+        </div>
+        <main>{children}</main>
+        <Footer />
+      </div>
     </div>
   );
 };

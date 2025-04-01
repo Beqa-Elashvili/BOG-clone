@@ -30,7 +30,6 @@ const useGetProtectedData = () => {
         },
       });
       if (response.data.user) {
-        console.log("User found:", response.data.user);
         await handleUser(response.data.user.userId);
       }
       console.log(response.data.user);

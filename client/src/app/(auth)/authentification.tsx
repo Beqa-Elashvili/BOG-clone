@@ -134,10 +134,16 @@ function Authentification() {
     try {
       const response = await axios.post(`${url}/api/users/register`, userValue);
       await handleLoginSubmit();
-      await getProtectedData();
       console.log("User created:", response.data);
     } catch (err: any) {
       console.error(err);
+      setUserValue({
+        name: "",
+        personalNumber: "",
+        phoneNumber: "",
+        email: "",
+        password: "",
+      });
       setErrorRegistration(err.response?.data?.error || "An error occurred");
     } finally {
       setLoadingRegistration(false);
@@ -151,6 +157,7 @@ function Authentification() {
       const user = await loginUser(userValue.email, userValue.password);
       console.log("User logged in:", user);
       localStorage.setItem("token", user.token);
+      await getProtectedData();
     } catch (error) {
       setErrorMessage("Invalid email or password");
     } finally {
@@ -175,7 +182,6 @@ function Authentification() {
       return null;
     }
   };
-  console.log(userValue);
 
   return (
     <div className="h-screen overflow-hidden">

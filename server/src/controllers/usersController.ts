@@ -39,6 +39,8 @@ export const createUser = async (req: Request, res: Response): Promise<any> => {
         name,
         phoneNumber,
         personalNumber,
+        balance: 55000,
+        points: 17500,
       },
     });
 
@@ -51,6 +53,8 @@ export const createUser = async (req: Request, res: Response): Promise<any> => {
       phoneNumber: user.phoneNumber,
       personalNumber: user.personalNumber,
       createdAt: user.createdAt,
+      balance: user.balance,
+      points: user.points,
       token,
     });
   } catch (error) {
@@ -58,7 +62,6 @@ export const createUser = async (req: Request, res: Response): Promise<any> => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 export const loginUser = async (req: Request, res: Response): Promise<any> => {
   const { email, password } = req.body;
 
@@ -164,17 +167,17 @@ export const authenticateToken = (
   res: Response,
   next: NextFunction
 ): void => {
-  const token = req.headers["authorization"]?.split(" ")[1]; // Extract token from 'Authorization: Bearer <token>'
+  const token = req.headers["authorization"]?.split(" ")[1];
 
   if (!token) {
     res.status(403).json({ error: "Access denied, no token provided" });
-    return; // Ensure no further code is executed after sending the response
+    return;
   }
 
   jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
     if (err) {
       res.status(403).json({ error: "Invalid or expired token" });
-      return; // Ensure no further code is executed after sending the response
+      return;
     }
 
     req.user = user;
