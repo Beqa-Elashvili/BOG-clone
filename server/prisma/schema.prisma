@@ -24,3 +24,10 @@ model User {
   points         Int      @default(0)
   createdAt      DateTime @default(now())
 }
+
+model Story {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId // Unique ID for the story
+  imageUrl  String // URL or file path of the uploaded image
+  createdAt DateTime @default(now()) // Timestamp when the story is created
+  updatedAt DateTime @updatedAt // Timestamp that updates when the story is modified
+}

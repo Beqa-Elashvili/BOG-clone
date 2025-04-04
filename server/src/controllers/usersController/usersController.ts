@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction, RequestHandler } from "express";
-import prisma from "../lib/prisma";
+import { Request, Response, NextFunction } from "express";
+import prisma from "../../lib/prisma"; // Adjust the import based on your project structure
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 

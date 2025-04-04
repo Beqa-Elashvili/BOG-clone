@@ -9,7 +9,8 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
-const userRouter_1 = __importDefault(require("./routes/userRouter"));
+const userRouter_1 = __importDefault(require("./routes/userRouter/userRouter"));
+const storyRouter_1 = __importDefault(require("./routes/storyRouter/storyRouter"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -19,6 +20,7 @@ app.use((0, morgan_1.default)("common"));
 app.use(body_parser_1.default.urlencoded({ extended: false }));
 app.use((0, cors_1.default)());
 app.use("/api/users", userRouter_1.default);
+app.use("/api/story", storyRouter_1.default);
 app.get("/hello", (req, res) => {
     res.send("hello world");
 });

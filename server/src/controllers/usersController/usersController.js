@@ -24,7 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticateToken = exports.getUserById = exports.getUserByEmail = exports.loginUser = exports.createUser = void 0;
-const prisma_1 = __importDefault(require("../lib/prisma"));
+const prisma_1 = __importDefault(require("../../lib/prisma")); // Adjust the import based on your project structure
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";

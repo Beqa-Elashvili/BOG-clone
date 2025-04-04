@@ -4,7 +4,8 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import userRoutes from "./routes/userRouter";
+import userRoutes from "./routes/userRouter/userRouter";
+import storyRoutes from "./routes/storyRouter/storyRouter";
 
 dotenv.config();
 const app = express();
@@ -16,6 +17,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
 app.use("/api/users", userRoutes);
+app.use("/api/story", storyRoutes);
 
 app.get("/hello", (req, res) => {
   res.send("hello world");

@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 function Footer() {
   const pathname = usePathname();
   return (
-    <div className="sticky bottom-0 bg-gray-900 p-2 pb-3 flex justify-between items-center">
+    <div className="absolute bottom-0 bg-gray-900 p-2 pb-3 w-full flex justify-between items-center">
       <div
         className={`flex flex-col items-center ${
           pathname === "/" && "text-orange-500"

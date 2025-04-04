@@ -5,7 +5,7 @@ import {
   getUserByEmail,
   authenticateToken,
   getUserById,
-} from "../controllers/usersController";
+} from "../../controllers/usersController/usersController";
 
 const router = Router();
 
