@@ -1,12 +1,12 @@
 export interface UserType {
+  balance: number;
+  createdAt: string;
+  email: string;
   id: string;
   name: string;
-  email: string;
-  phoneNumber: string;
   personalNumber: string;
-  password?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  phoneNumber: string;
+  points: number;
 }
 
 export interface storyTypes {
