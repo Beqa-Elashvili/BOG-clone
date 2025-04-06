@@ -15,3 +15,13 @@ export interface storyTypes {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export interface offerTypes {
+  id: string;
+  title: string;
+  mainTitle: string;
+  imageUrl: string;
+  metaDescription: string;
+  createdAt: string;
+  isActive: boolean;
+}

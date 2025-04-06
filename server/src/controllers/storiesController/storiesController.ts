@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../../lib/prisma";
+
 export const addStory = async (req: Request, res: Response): Promise<any> => {
   const { imageUrl } = req.body;
 

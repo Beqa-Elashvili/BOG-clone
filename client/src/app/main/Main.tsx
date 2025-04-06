@@ -3,22 +3,27 @@
 import React, { useEffect, useState } from "react";
 import { Carousel } from "antd";
 import axios from "axios";
-import { storyTypes } from "../types/globaltypes";
+import { storyTypes, offerTypes } from "../types/globaltypes";
 import { useAppSelector } from "../redux";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa6";
+import { IoIosClose } from "react-icons/io";
 
 type Props = {};
 
 function page({}: Props) {
   const [stories, setStories] = React.useState<storyTypes[]>([]);
+  const [offers, setOffers] = React.useState<offerTypes[]>([]);
   const { isUser } = useAppSelector((state) => state.global);
   const [visible, setVisible] = useState<boolean>(true);
   const [dropDown, setDropDown] = useState<boolean>(false);
   const url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const getStories = async () => {
     const resp = await axios.get(`${url}/api/story/stories`);
+    const OfferResp = await axios.get(`${url}/api/offers/offers`);
     setStories(resp.data);
+    setOffers(OfferResp.data);
   };
   useEffect(() => {
     getStories();
@@ -48,6 +53,13 @@ function page({}: Props) {
       } else if (coin === "€") {
         return isUser?.balance * 0.25;
       }
+  };
+
+  const PointsCosts = () => {
+    if (isUser?.points) {
+      const costs = isUser?.points / 400;
+      return costs;
+    }
   };
 
   return (
@@ -164,6 +176,56 @@ function page({}: Props) {
           } transition-transform duration-300 ease-in-out rounded-lg`}
         ></div>
       </div>
+      <div className="mt-4 bg-gray-800 p-2 rounded-lg flex justify-between items-center">
+        <div>
+          <p className="text-gray-500 text-[12px]">PLUS ქულები</p>
+          <p className="text-sm">{isUser?.points}</p>
+          <p className="text-gray-500 text-[12px]">{PointsCosts()} ₾</p>
+        </div>
+        <p className="text-orange-600 font-semibold text-sm">PLUS</p>
+      </div>
+      {offers && offers.length > 0 && (
+        <div className="bg-gray-800  mb-20 p-1 rounded-lg">
+          <h1 className="text-md  p-2">ბოლო შეთავაზებები</h1>
+          <Carousel
+            slidesToScroll={2}
+            centerPadding="2px 0px 0px 0px"
+            slidesToShow={2}
+            dots={false}
+          >
+            {offers.map((offer) => (
+              <div key={offer.id} className="p-2">
+                <div
+                  style={{ backgroundColor: "rgba(109, 74, 18, 0.434)" }}
+                  className="w-full  h-42 m-auto p-1  rounded-lg"
+                >
+                  <div className="flex w-full h-full text-white">
+                    <div className="w-full flex flex-col justify-between h-full">
+                      <div>
+                        <img
+                          src={offer.imageUrl}
+                          alt="storyImg"
+                          className=" h-[4rem]  w-[4rem] object-cover"
+                        />
+                        <p className="text-[12px]">{offer.mainTitle}</p>
+                      </div>
+                      <button className=" text-orange-600 font-semibold text-[12px] text-start rounded-lg">
+                        {offer.title}
+                      </button>
+                    </div>
+                    <IoIosClose
+                      onClick={() =>
+                        setOffers(offers.filter((item) => item.id !== offer.id))
+                      }
+                      className="p-px inline  w-6 h-6 rounded-full bg-gray-800 size-6 text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </Carousel>
+        </div>
+      )}
     </div>
   );
 }

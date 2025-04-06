@@ -14,20 +14,43 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  email          String   @unique
+  id             String      @id @default(auto()) @map("_id") @db.ObjectId
+  email          String      @unique
   password       String
   name           String
   phoneNumber    String
   personalNumber String
-  balance        Int      @default(0)
-  points         Int      @default(0)
-  createdAt      DateTime @default(now())
+  balance        Int         @default(0)
+  points         Int         @default(0)
+  createdAt      DateTime    @default(now())
+  UserOffer      UserOffer[]
 }
 
 model Story {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId // Unique ID for the story
-  imageUrl  String // URL or file path of the uploaded image
-  createdAt DateTime @default(now()) // Timestamp when the story is created
-  updatedAt DateTime @updatedAt // Timestamp that updates when the story is modified
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Offer {
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  mainTitle       String
+  imageUrl        String
+  metaDescription String
+  description     String[]
+  createdAt       DateTime    @default(now())
+  isActive        Boolean     @default(false)
+  UserOffer       UserOffer[]
+}
+
+model UserOffer {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  offerId   String   @db.ObjectId
+  userId    String   @db.ObjectId
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  offer     Offer    @relation(fields: [offerId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }

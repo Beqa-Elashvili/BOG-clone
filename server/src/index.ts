@@ -6,6 +6,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import userRoutes from "./routes/userRouter/userRouter";
 import storyRoutes from "./routes/storyRouter/storyRouter";
+import offerRoutes from "./routes/offerRouter/offerRouter"; 
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,7 @@ app.use(cors());
 
 app.use("/api/users", userRoutes);
 app.use("/api/story", storyRoutes);
+app.use("/api/offers", offerRoutes);
 
 app.get("/hello", (req, res) => {
   res.send("hello world");
