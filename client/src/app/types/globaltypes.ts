@@ -22,6 +22,8 @@ export interface offerTypes {
   mainTitle: string;
   imageUrl: string;
   metaDescription: string;
+  description: string[];
+  offerId: string;
   createdAt: string;
   isActive: boolean;
 }

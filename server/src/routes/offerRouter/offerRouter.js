@@ -8,4 +8,6 @@ const offersController_1 = require("../../controllers/offersController/offersCon
 const router = express_1.default.Router();
 router.post("/offers", offersController_1.addOffer);
 router.get("/offers", offersController_1.getOffers);
+router.post("/activateOffer", offersController_1.addActiveOfferForUser);
+router.get("/getActiveOffer/:userId", offersController_1.getActivatedOffersForUser);
 exports.default = router;

@@ -1,13 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { UserType } from "@/app/types/globaltypes";
+import { UserType, offerTypes } from "@/app/types/globaltypes";
 export interface InitialValues {
   isUser: UserType | null;
   isRegisterForm: boolean;
+  activatorOffers: offerTypes[] | null;
 }
 
 const initialState: InitialValues = {
   isUser: null,
   isRegisterForm: true,
+  activatorOffers: null,
 };
 
 export const globalSlice = createSlice({
@@ -20,9 +22,12 @@ export const globalSlice = createSlice({
     setIsRegisterForm: (state, action: PayloadAction<boolean>) => {
       state.isRegisterForm = action.payload;
     },
+    setActivateOffers: (state, action: PayloadAction<offerTypes[] | null>) => {
+      state.activatorOffers = action.payload;
+    }
   },
 });
 
-export const { setIsUser, setIsRegisterForm } = globalSlice.actions;
+export const { setIsUser, setIsRegisterForm,setActivateOffers } = globalSlice.actions;
 
 export default globalSlice.reducer;

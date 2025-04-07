@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { act, useEffect, useState } from "react";
 import { Carousel } from "antd";
 import axios from "axios";
 import { storyTypes, offerTypes } from "../types/globaltypes";
@@ -8,22 +8,29 @@ import { useAppSelector } from "../redux";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa6";
 import { IoIosClose } from "react-icons/io";
+import { FaAngleLeft } from "react-icons/fa";
+import { CiCircleCheck } from "react-icons/ci";
+import { Spin } from "antd";
+import { IoMdCheckmarkCircle } from "react-icons/io";
+import useGetActivateOffers from "../hooks/getActivateOffers/useGetActivateOffers";
 
-type Props = {};
-
-function page({}: Props) {
+function page() {
   const [stories, setStories] = React.useState<storyTypes[]>([]);
   const [offers, setOffers] = React.useState<offerTypes[]>([]);
   const { isUser } = useAppSelector((state) => state.global);
   const [visible, setVisible] = useState<boolean>(true);
   const [dropDown, setDropDown] = useState<boolean>(false);
   const url = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const [offerLoading, setOfferLoading] = useState<boolean>(false);
+  const { getActiveOffer } = useGetActivateOffers();
+  const activeOffers = useAppSelector((state) => state.global.activatorOffers);
 
   const getStories = async () => {
     const resp = await axios.get(`${url}/api/story/stories`);
     const OfferResp = await axios.get(`${url}/api/offers/offers`);
     setStories(resp.data);
     setOffers(OfferResp.data);
+    await getActiveOffer();
   };
   useEffect(() => {
     getStories();
@@ -61,7 +68,80 @@ function page({}: Props) {
       return costs;
     }
   };
+  const [succes, setSucces] = useState<boolean>(false);
 
+  const [offerId, setOfferId] = useState<string>("");
+  if (offerId) {
+    const offer = offers.find((item) => item.id === offerId);
+
+    const handleOfferActivate = async () => {
+      try {
+        setOfferLoading(true);
+        await axios.post(`${url}/api/offers/activateOffer`, {
+          userId: isUser?.id,
+          offerId: offer?.id,
+        });
+        await getActiveOffer();
+        setSucces(true);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setOfferLoading(false);
+        const timeout = setTimeout(() => {
+          setSucces(false);
+          setOfferId("");
+        }, 1000);
+        return () => clearTimeout(timeout);
+      }
+    };
+    const findOffer = activeOffers?.find((item) => item.offerId === offerId);
+    return (
+      <div className="absolute p-2 inset-0 bg-white/10 w-full h-full z-10">
+        <div className="mt-8 flex justify-between items-center">
+          <FaAngleLeft onClick={() => setOfferId("")} />
+          <h1>{offer?.title}</h1>
+        </div>
+        <img className="size-40 m-auto" src={offer?.imageUrl} alt="" />
+        <p className="text-gray-300">{offer?.metaDescription}</p>
+        <div className="flex flex-col mt-8 justify-start gap-2">
+          {offer?.description.map((item, index) => (
+            <div key={index} className="flex items-cente gap-2">
+              <CiCircleCheck className="size-6 text-green-500" />
+              <p className="text-sm">{item}</p>
+            </div>
+          ))}
+        </div>
+        <div className="relative w-full" style={{ position: "relative" }}>
+          <button
+            disabled={findOffer ? true : false}
+            onClick={() => handleOfferActivate()}
+            className="text-center  w-full mt-12 p-2 bg-orange-700 rounded-lg"
+          >
+            {findOffer ? "შეთავაზება უკვე გააქტიურებულია !" : offer?.title}
+          </button>
+          {offerLoading && (
+            <Spin
+              style={{
+                position: "absolute",
+                top: "65%",
+                color: "#3434343",
+                bottom: "50%",
+                right: 6,
+              }}
+            />
+          )}
+        </div>
+        {succes && (
+          <div className="absolute bg-black/50 flex justify-center items-center inset-0 text-white   w-full h-full z-10 ">
+            <div className="border flex items-center justify-center rounded-lg  bg-orange-500 w-5/6 h-2/12">
+              <h1>შეთავაზება წარმატებით გააქტიურდა</h1>
+              <IoMdCheckmarkCircle className="text-orange-100  size-6 rounded-lg" />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
   return (
     <div className="p-2 flex flex-col gap-2 w-full">
       <Carousel
@@ -194,7 +274,11 @@ function page({}: Props) {
             dots={false}
           >
             {offers.map((offer) => (
-              <div key={offer.id} className="p-2">
+              <div
+                onClick={() => setOfferId(offer.id)}
+                key={offer.id}
+                className="p-2"
+              >
                 <div
                   style={{ backgroundColor: "rgba(109, 74, 18, 0.434)" }}
                   className="w-full  h-42 m-auto p-1  rounded-lg"
@@ -217,7 +301,7 @@ function page({}: Props) {
                       onClick={() =>
                         setOffers(offers.filter((item) => item.id !== offer.id))
                       }
-                      className="p-px inline  w-6 h-6 rounded-full bg-gray-800 size-6 text-white"
+                      className="p-px inline cursor-pointer w-6 h-6 rounded-full bg-gray-800 size-6 text-white"
                     />
                   </div>
                 </div>

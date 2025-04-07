@@ -34,6 +34,7 @@ const useGetProtectedData = () => {
       }
       console.log(response.data.user);
     } catch (error) {
+      dispatch(setIsUser(null));
       console.error("Error fetching protected data:", error);
     }
   };

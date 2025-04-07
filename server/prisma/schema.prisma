@@ -53,4 +53,6 @@ model UserOffer {
   createdAt DateTime @default(now())
   offer     Offer    @relation(fields: [offerId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, offerId]) // Compound unique constraint
 }
