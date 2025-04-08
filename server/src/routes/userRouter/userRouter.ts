@@ -2,17 +2,18 @@ import { Router, Request } from "express";
 import {
   createUser,
   loginUser,
-  getUserByEmail,
   authenticateToken,
-  getUserById,
+  getUser,
 } from "../../controllers/usersController/usersController";
 
 const router = Router();
 
 router.post("/register", createUser);
 router.post("/login", loginUser);
-router.get("/email/:email", getUserByEmail);
-router.get("/userId/:userId", getUserById);
+router.get("/email/:email", getUser);
+router.get("/userId/:userId", getUser);
+router.get("/personalNumber/:personalNumber", getUser);
+router.get("/users", getUser);
 
 router.get("/protectedRoute", authenticateToken, (req, res) => {
   res.json({

@@ -102,23 +102,42 @@ export const loginUser = async (req: Request, res: Response): Promise<any> => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+export const getUser = async (req: Request, res: Response): Promise<any> => {
+  const { email, userId, personalNumber } = req.params;
+  const { all } = req.query;
 
-export const getUserByEmail = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
-  const { email } = req.params;
-
-  if (!email) {
-    return res.status(400).json({ error: "Email is required" });
+  if (!email && !userId && !personalNumber && all !== "true") {
+    return res.status(400).json({
+      error:
+        "At least one parameter (email, userId, or personalNumber) is required",
+    });
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    let user;
+    if (all === "true") {
+      user = await prisma.user.findMany({});
+    }
+    if (email) {
+      user = await prisma.user.findUnique({
+        where: { email },
+      });
+    } else if (userId) {
+      user = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+    } else if (personalNumber) {
+      user = await prisma.user.findUnique({
+        where: { personalNumber },
+      });
+    }
+
+    if (Array.isArray(user)) {
+      const userData = user.map(
+        ({ password, balance, points, ...rest }) => rest
+      );
+      return res.status(200).json(userData);
+    }
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -128,37 +147,7 @@ export const getUserByEmail = async (
 
     return res.status(200).json(userData);
   } catch (error) {
-    console.error("Error retrieving user by email:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-export const getUserById = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
-  const { userId } = req.params;
-
-  if (!userId) {
-    return res.status(400).json({ error: "Email is required" });
-  }
-
-  try {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    const { password, ...userData } = user;
-
-    return res.status(200).json(userData);
-  } catch (error) {
-    console.error("Error retrieving user by email:", error);
+    console.error("Error retrieving user:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };

@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authenticateToken = exports.getUserById = exports.getUserByEmail = exports.loginUser = exports.createUser = void 0;
+exports.authenticateToken = exports.getUser = exports.loginUser = exports.createUser = void 0;
 const prisma_1 = __importDefault(require("../../lib/prisma")); // Adjust the import based on your project structure
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -113,17 +113,41 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.loginUser = loginUser;
-const getUserByEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email } = req.params;
-    if (!email) {
-        return res.status(400).json({ error: "Email is required" });
+const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email, userId, personalNumber } = req.params;
+    const { all } = req.query;
+    if (!email && !userId && !personalNumber && all !== "true") {
+        return res.status(400).json({
+            error: "At least one parameter (email, userId, or personalNumber) is required",
+        });
     }
     try {
-        const user = yield prisma_1.default.user.findUnique({
-            where: {
-                email,
-            },
-        });
+        let user;
+        if (all === "true") {
+            user = yield prisma_1.default.user.findMany({});
+        }
+        if (email) {
+            user = yield prisma_1.default.user.findUnique({
+                where: { email },
+            });
+        }
+        else if (userId) {
+            user = yield prisma_1.default.user.findUnique({
+                where: { id: userId },
+            });
+        }
+        else if (personalNumber) {
+            user = yield prisma_1.default.user.findUnique({
+                where: { personalNumber },
+            });
+        }
+        if (Array.isArray(user)) {
+            const userData = user.map((_a) => {
+                var { password, balance, points } = _a, rest = __rest(_a, ["password", "balance", "points"]);
+                return rest;
+            });
+            return res.status(200).json(userData);
+        }
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
@@ -131,34 +155,11 @@ const getUserByEmail = (req, res) => __awaiter(void 0, void 0, void 0, function*
         return res.status(200).json(userData);
     }
     catch (error) {
-        console.error("Error retrieving user by email:", error);
+        console.error("Error retrieving user:", error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 });
-exports.getUserByEmail = getUserByEmail;
-const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId } = req.params;
-    if (!userId) {
-        return res.status(400).json({ error: "Email is required" });
-    }
-    try {
-        const user = yield prisma_1.default.user.findUnique({
-            where: {
-                id: userId,
-            },
-        });
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-        const { password } = user, userData = __rest(user, ["password"]);
-        return res.status(200).json(userData);
-    }
-    catch (error) {
-        console.error("Error retrieving user by email:", error);
-        return res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-exports.getUserById = getUserById;
+exports.getUser = getUser;
 const authenticateToken = (req, res, next) => {
     var _a;
     const token = (_a = req.headers["authorization"]) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
