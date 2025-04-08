@@ -16,7 +16,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="w-full  bg-black flex justify-center">
-      <div className="w-ful  min-w-[375px] max-w-[430px] relative bg-gray-900 text-white  h-full min-h-screen">
+      <div className="min-w-[375px] max-w-[430px] relative bg-gray-900 text-white  h-full min-h-screen">
         <div className={`${isUser ? "block" : "hidden"}`}>
           <Header />
         </div>

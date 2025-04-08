@@ -182,6 +182,29 @@ function page() {
       </div>
     );
   }
+  const today = new Date();
+
+  const monthsInGeorgian = [
+    "იანვარი",
+    "თებერვალი",
+    "მარტი",
+    "აპრილი",
+    "მაისი",
+    "ივნისი",
+    "ივლისი",
+    "აგვისტო",
+    "სექტემბერი",
+    "ოქტომბერი",
+    "ნოემბერი",
+    "დეკემბერი",
+  ];
+
+  const day = today.getDate().toString().padStart(2, "0");
+  const month = monthsInGeorgian[today.getMonth()];
+  const year = today.getFullYear();
+
+  const formattedDate = `${day} ${month.slice(0, 3)}, ${year}`;
+
   return (
     <div className="p-2 flex flex-col gap-2 w-full">
       <Carousel
@@ -303,15 +326,15 @@ function page() {
       </div>
       <div className="mt-4 bg-gray-800 p-2 rounded-lg flex justify-between items-center">
         <div>
-          <p className="text-gray-500 text-[12px]">PLUS ქულები</p>
+          <p className="text-gray-400 text-[12px]">PLUS ქულები</p>
           <p className="text-sm">{isUser?.points}</p>
-          <p className="text-gray-500 text-[12px]">{PointsCosts()} ₾</p>
+          <p className="text-gray-400 text-[12px]">{PointsCosts()} ₾</p>
         </div>
         <p className="text-orange-600 font-semibold text-sm">PLUS</p>
       </div>
       {offers && offers.length > 0 && (
-        <div className="bg-gray-800  mb-20 p-1 rounded-lg">
-          <h1 className="text-md  p-2">ბოლო შეთავაზებები</h1>
+        <div className="bg-gray-800 p-1 rounded-lg">
+          <h1 className="text-md p-2">ბოლო შეთავაზებები</h1>
           <Carousel
             slidesToScroll={2}
             centerPadding="2px 0px 0px 0px"
@@ -354,6 +377,10 @@ function page() {
           </Carousel>
         </div>
       )}
+      <div className="text-white  bg-gray-800 rounded-lg p-2 mb-20">
+        <h1 className="text-md">ბოლო ტრანზაქციები</h1>
+        <p className="my-2 text-sm text-gray-400">{formattedDate}</p>
+      </div>
     </div>
   );
 }
