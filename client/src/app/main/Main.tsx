@@ -24,6 +24,19 @@ function page() {
   const [offerLoading, setOfferLoading] = useState<boolean>(false);
   const { getActiveOffer } = useGetActivateOffers();
   const activeOffers = useAppSelector((state) => state.global.activatorOffers);
+  const [animateLine, setAnimateLine] = useState(false);
+  const [storyId, setStoryId] = useState<string>("");
+
+  useEffect(() => {
+    if (storyId) {
+      setAnimateLine(true);
+      const timer = setTimeout(() => {
+        setStoryId("");
+        setAnimateLine(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [storyId]);
 
   const getStories = async () => {
     const resp = await axios.get(`${url}/api/story/stories`);
@@ -71,6 +84,30 @@ function page() {
   const [succes, setSucces] = useState<boolean>(false);
 
   const [offerId, setOfferId] = useState<string>("");
+
+  if (storyId) {
+    const story = stories.find((item) => item.id === storyId);
+    return (
+      <div className="absolute z-10  inset-0 text-center bg-black w-full h-full ">
+        <img
+          className="h-full w-full  object-cover"
+          src={story?.imageUrl}
+          alt="image"
+        />
+        <IoIosClose
+          onClick={() => {
+            setStoryId(""), setAnimateLine(false);
+          }}
+          className="cursor-pointer absolute bg-gray-500 rounded-full top-2 right-2"
+        />
+        <div
+          className={`absolute bottom-0 left-0 h-1 bg-white transition-all duration-3000 ease-in-out ${
+            animateLine ? "w-full" : "w-0"
+          }`}
+        ></div>
+      </div>
+    );
+  }
   if (offerId) {
     const offer = offers.find((item) => item.id === offerId);
 
@@ -98,7 +135,10 @@ function page() {
     return (
       <div className="absolute p-2 inset-0 bg-white/10 w-full h-full z-10">
         <div className="mt-8 flex justify-between items-center">
-          <FaAngleLeft onClick={() => setOfferId("")} />
+          <FaAngleLeft
+            className="cursor-pointer"
+            onClick={() => setOfferId("")}
+          />
           <h1>{offer?.title}</h1>
         </div>
         <img className="size-40 m-auto" src={offer?.imageUrl} alt="" />
@@ -148,11 +188,16 @@ function page() {
         slidesToScroll={2}
         centerPadding="30px 0px 0px 0px"
         centerMode={true}
+        autoplay={true}
         slidesToShow={3}
         dots={false}
       >
         {stories.map((story) => (
-          <div key={story.id} className="p-2">
+          <div
+            key={story.id}
+            onClick={() => setStoryId(story.id)}
+            className="p-2"
+          >
             <div className="ring-2 w-[5rem]  p-px ring-orange-600 rounded-lg">
               <img
                 src={story.imageUrl}
@@ -274,11 +319,7 @@ function page() {
             dots={false}
           >
             {offers.map((offer) => (
-              <div
-                onClick={() => setOfferId(offer.id)}
-                key={offer.id}
-                className="p-2"
-              >
+              <div key={offer.id} className="p-2">
                 <div
                   style={{ backgroundColor: "rgba(109, 74, 18, 0.434)" }}
                   className="w-full  h-42 m-auto p-1  rounded-lg"
@@ -293,7 +334,10 @@ function page() {
                         />
                         <p className="text-[12px]">{offer.mainTitle}</p>
                       </div>
-                      <button className=" text-orange-600 font-semibold text-[12px] text-start rounded-lg">
+                      <button
+                        onClick={() => setOfferId(offer.id)}
+                        className=" cursor-pointer text-orange-600 font-semibold text-[12px] text-start rounded-lg"
+                      >
                         {offer.title}
                       </button>
                     </div>
