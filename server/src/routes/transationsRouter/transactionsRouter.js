@@ -7,4 +7,5 @@ const express_1 = __importDefault(require("express"));
 const transitionController_1 = require("../../controllers/transitionController/transitionController");
 const router = express_1.default.Router();
 router.post("/transaction", transitionController_1.createTransaction);
+router.get("/transaction/:userId", transitionController_1.getUserTransactions);
 exports.default = router;

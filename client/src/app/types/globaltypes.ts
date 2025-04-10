@@ -27,3 +27,16 @@ export interface offerTypes {
   createdAt: string;
   isActive: boolean;
 }
+export interface TransactionTypes {
+  id: string;
+  amount: number;
+  balance: number;
+  createdAt: string;
+  destination: string;
+  status: string;
+  points: number;
+  fromUserId: string;
+  toUserId: string;
+  fromUser: UserType;
+  toUser: UserType;
+}

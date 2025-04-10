@@ -2,14 +2,21 @@
 import { useAppSelector } from "../redux";
 import { FaAngleLeft, FaChevronRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { Form, FormProps } from "antd";
+import { Form, FormProps, Spin } from "antd";
 import Input from "../(Components)/Input";
 import axios from "axios";
+import { useState } from "react";
+import { IoMdCheckmarkCircle } from "react-icons/io";
 
 function page() {
   const router = useRouter();
   const { users, isUser } = useAppSelector((state) => state.global);
+  const [personalNum, setPersonalNum] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
+  const [form] = Form.useForm();
 
+  const filtered = users?.find((item) => item.personalNumber === personalNum);
   type FieldType = {
     transferFrom?: string;
     transferTo?: string;
@@ -18,15 +25,21 @@ function page() {
     amount?: number;
     destination?: string;
   };
-  console.log(users);
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     try {
+      setLoading(true);
       const url = process.env.NEXT_PUBLIC_API_BASE_URL;
-      const filtered = users?.find(
-        (item) => item.personalNumber === values.transferTo
-      );
       if (filtered?.personalNumber === isUser?.personalNumber) {
+        return;
+      }
+      if (filtered?.personalNumber === isUser?.personalNumber) {
+        form.setFields([
+          {
+            name: "transferedTo",
+            errors: ["გთხოვთ შეიყვანოთ სწორი პირადი ნომერი!"],
+          },
+        ]);
         return;
       }
       const resp = await axios.post(`${url}/api/transaction/transaction`, {
@@ -35,8 +48,19 @@ function page() {
         amount: Number(values.amount),
         destination: values.destination,
       });
+      setSuccess(true);
+      setLoading(false);
       console.log(resp.data);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+      const timeout = setTimeout(() => {
+        setSuccess(false);
+        router.push("/");
+      }, 1000);
+      return () => clearTimeout(timeout);
+    }
   };
 
   return (
@@ -61,8 +85,16 @@ function page() {
           <div className="h-20  w-full rounded-r-lg  z-0  bg-orange-500"></div>
           <div className="absolute z-20">
             <div className="relative ml-12 overflow-hiddentransition duration-300 overflow-hidden  gap-2  cursor-pointer rounded-md">
-              <h1>{isUser?.personalNumber}...</h1>
-              <h1>{isUser?.balance} ₾</h1>
+              {filtered ? (
+                <>
+                  <h1>{filtered?.personalNumber}...</h1>
+                  <h1>{filtered?.name}</h1>
+                </>
+              ) : (
+                <>
+                  <h1>სად</h1>
+                </>
+              )}
             </div>
           </div>
           <div className="bg-gradient-to-br rounded-r-lg opacity-50  from-red-800 to-blue-500 rounded-r-lg absolute bottom-0 right-0 w-full h-full transform"></div>
@@ -71,6 +103,7 @@ function page() {
       <div className="bg-gray-800 text-white p-2">
         <Form
           name="basic"
+          form={form}
           initialValues={{
             transferFrom: isUser?.personalNumber,
             username: isUser?.name,
@@ -105,7 +138,13 @@ function page() {
               },
             ]}
           >
-            <Input placeholder="პირადი ნომრით" name="transferTo" type="text" />
+            <Input
+              onChange={(e) => setPersonalNum(e.target.value)}
+              placeholder="პირადი ნომრით"
+              name="transferTo"
+              maxLength={11}
+              type="text"
+            />
           </Form.Item>
           <hr />
           <Form.Item<FieldType>
@@ -150,14 +189,35 @@ function page() {
             <Input name="destination" type="text" label="დანიშნულება" />
           </Form.Item>
           <Form.Item>
-            <button
-              className="w-full rounded-lg bg-gray-800 border rounded-lg text-white font-semibold p-2"
-              type="submit"
-            >
-              გადარიცხვა
-            </button>
+            <div className="relative flex items-center">
+              <button
+                disabled={loading}
+                className="w-full rounded-lg bg-gray-800 border rounded-lg text-white font-semibold p-2"
+                type="submit"
+              >
+                გადარიცხვა
+              </button>
+              {loading && (
+                <Spin
+                  style={{
+                    position: "absolute",
+                    display: "flex",
+                    alignItems: "center",
+                    right: "12px",
+                  }}
+                />
+              )}
+            </div>
           </Form.Item>
         </Form>
+        {success && (
+          <div className="absolute bg-black/50 flex justify-center items-center inset-0 text-white  w-full h-full z-10 ">
+            <div className="border flex flex-col items-center justify-center rounded-lg  bg-orange-500 w-5/6 h-2/12">
+              <h1>გადარიცხვა წარმატებით განხორციელდა</h1>
+              <IoMdCheckmarkCircle className="text-orange-100  size-6 rounded-lg" />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

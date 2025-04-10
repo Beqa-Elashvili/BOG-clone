@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createTransaction = void 0;
+exports.getUserTransactions = exports.createTransaction = void 0;
 const prisma_1 = __importDefault(require("../../lib/prisma"));
 const createTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { fromUserId, toUserId, amount, destination } = req.body;
@@ -67,3 +67,36 @@ const createTransaction = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.createTransaction = createTransaction;
+const getUserTransactions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.params;
+    if (!userId) {
+        return res
+            .status(400)
+            .json({ error: "userId is required to fetch transactions" });
+    }
+    try {
+        const transactions = yield prisma_1.default.transaction.findMany({
+            where: {
+                OR: [{ fromUserId: userId }, { toUserId: userId }],
+            },
+            include: {
+                fromUser: true,
+                toUser: true,
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+        if (transactions.length === 0) {
+            return res
+                .status(404)
+                .json({ error: "No transactions found for this user" });
+        }
+        return res.status(200).json({ transactions });
+    }
+    catch (error) {
+        console.error("Error fetching transactions:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+exports.getUserTransactions = getUserTransactions;

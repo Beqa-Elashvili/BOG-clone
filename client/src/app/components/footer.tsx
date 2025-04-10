@@ -3,10 +3,11 @@ import { MdHome } from "react-icons/md";
 import { FaRegRectangleList } from "react-icons/fa6";
 import { BiSolidOffer } from "react-icons/bi";
 import { PiGridFourFill } from "react-icons/pi";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 function Footer() {
   const pathname = usePathname();
+  const router = useRouter();
   return (
     <div className="absolute bottom-0 bg-gray-900 p-2 pb-3 w-full flex justify-between items-center">
       <div
@@ -21,7 +22,10 @@ function Footer() {
         <FaRegRectangleList />
         <p className="text-[12px] font-semibold">ჩემი სივრცე</p>
       </div>
-      <div>
+      <div
+        className="cursor-pointer"
+        onClick={() => router.push("/transaction")}
+      >
         <div className="font-semibold">₾</div>
       </div>
       <div className="flex flex-col items-center">

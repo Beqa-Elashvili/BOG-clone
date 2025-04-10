@@ -3,7 +3,7 @@
 import React, { act, useEffect, useState } from "react";
 import { Carousel } from "antd";
 import axios from "axios";
-import { storyTypes, offerTypes } from "../types/globaltypes";
+import { storyTypes, offerTypes, TransactionTypes } from "../types/globaltypes";
 import { useAppSelector } from "../redux";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa6";
@@ -17,7 +17,11 @@ import useGetActivateOffers from "../hooks/getActivateOffers/useGetActivateOffer
 function page() {
   const [stories, setStories] = React.useState<storyTypes[]>([]);
   const [offers, setOffers] = React.useState<offerTypes[]>([]);
-  const { isUser, users } = useAppSelector((state) => state.global);
+  const [transactions, setTransactions] = useState<TransactionTypes[] | null>(
+    []
+  );
+  const { isUser } = useAppSelector((state) => state.global);
+
   const [visible, setVisible] = useState<boolean>(true);
   const [dropDown, setDropDown] = useState<boolean>(false);
   const url = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -26,6 +30,7 @@ function page() {
   const activeOffers = useAppSelector((state) => state.global.activatorOffers);
   const [animateLine, setAnimateLine] = useState(false);
   const [storyId, setStoryId] = useState<string>("");
+  const [transitionId, setTransitionId] = useState<string>("");
 
   useEffect(() => {
     if (storyId) {
@@ -38,15 +43,20 @@ function page() {
     }
   }, [storyId]);
 
-  const getStories = async () => {
+  const getInfo = async () => {
     const resp = await axios.get(`${url}/api/story/stories`);
     const OfferResp = await axios.get(`${url}/api/offers/offers`);
+    const transactionsResp = await axios.get(
+      `${url}/api/transaction/transaction/${isUser?.id}`
+    );
+    setTransactions(transactionsResp.data.transactions);
     setStories(resp.data);
     setOffers(OfferResp.data);
     await getActiveOffer();
   };
+
   useEffect(() => {
-    getStories();
+    getInfo();
   }, []);
 
   const [walute, setWalute] = useState<string>("₾");
@@ -108,6 +118,7 @@ function page() {
       </div>
     );
   }
+
   if (offerId) {
     const offer = offers.find((item) => item.id === offerId);
 
@@ -131,6 +142,7 @@ function page() {
         return () => clearTimeout(timeout);
       }
     };
+
     const findOffer = activeOffers?.find((item) => item.offerId === offerId);
     return (
       <div className="absolute p-2 inset-0 bg-white/10 w-full h-full z-10">
@@ -182,6 +194,39 @@ function page() {
       </div>
     );
   }
+
+  if (transitionId) {
+    const transition = transactions?.find((item) => item.id === transitionId);
+    const date = new Date(transition?.createdAt!);
+    const formDate = new Intl.DateTimeFormat("ka-GE", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(date);
+    return (
+      <div className="absolute z-10  inset-0 text-center bg-black w-full h-full">
+        <div className="bg-gray-800 space-y-2 p-2">
+          <div className="flex gap-4 items-center">
+            <FaAngleLeft
+              className="cursor-pointer"
+              onClick={() => setTransitionId("")}
+            />
+            <h1>ტრანზაქციები</h1>
+          </div>
+          <h1 className="text-orange-500 text-6xl">₾</h1>
+          <p>{transition?.toUser.name}</p>
+          <p>{formDate}</p>
+          <div className="text-4xl">
+            {transition?.fromUser.id === isUser?.id ? (
+              <h1>-{transition?.amount} ₾</h1>
+            ) : (
+              <h1>{transition?.amount} ₾</h1>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
   const today = new Date();
 
   const monthsInGeorgian = [
@@ -205,6 +250,7 @@ function page() {
 
   const formattedDate = `${day} ${month.slice(0, 3)}, ${year}`;
 
+  console.log(transactions);
   return (
     <div className="p-2 flex flex-col gap-2 w-full">
       <Carousel
@@ -380,6 +426,38 @@ function page() {
       <div className="text-white  bg-gray-800 rounded-lg p-2 mb-20">
         <h1 className="text-md">ბოლო ტრანზაქციები</h1>
         <p className="my-2 text-sm text-gray-400">{formattedDate}</p>
+        <div className="space-y-4">
+          {transactions?.map((item: TransactionTypes) => (
+            <div
+              onClick={() => setTransitionId(item.id)}
+              key={item.id}
+              className="flex justify-between items-center"
+            >
+              <div className="flex gap-2 items-center">
+                <div className="text-orange-500 border-gray-500 bg-gray-900 border rounded-full h-8 w-8 flex items-center justify-center">
+                  ₾
+                </div>
+                <div>
+                  {item.fromUser.id === isUser?.id ? (
+                    <h1>{item.toUser.name}</h1>
+                  ) : (
+                    <>
+                      <h1>{item.fromUser.name}</h1>
+                    </>
+                  )}
+                  <p className="text-gray-400 text-sm">გადარიცხვები</p>
+                </div>
+              </div>
+              <div>
+                {item.fromUser.id === isUser?.id ? (
+                  <h1>-{item.amount} ₾</h1>
+                ) : (
+                  <h1 className="text-green-500">{item.amount} ₾</h1>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
