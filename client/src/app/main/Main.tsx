@@ -17,7 +17,7 @@ import useGetActivateOffers from "../hooks/getActivateOffers/useGetActivateOffer
 function page() {
   const [stories, setStories] = React.useState<storyTypes[]>([]);
   const [offers, setOffers] = React.useState<offerTypes[]>([]);
-  const { isUser } = useAppSelector((state) => state.global);
+  const { isUser, users } = useAppSelector((state) => state.global);
   const [visible, setVisible] = useState<boolean>(true);
   const [dropDown, setDropDown] = useState<boolean>(false);
   const url = process.env.NEXT_PUBLIC_API_BASE_URL;

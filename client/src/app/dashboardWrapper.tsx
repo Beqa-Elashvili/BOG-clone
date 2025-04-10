@@ -11,9 +11,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { getProtectedData } = useGetProtectedData();
   const { isUser } = useAppSelector((state) => state.global);
   const pathname = usePathname();
-  useEffect(() => {
-    getProtectedData();
-  }, []);
+  // useEffect(() => {
+  //   getProtectedData();
+  // }, []);
 
   return (
     <div className="w-full  bg-black flex justify-center">

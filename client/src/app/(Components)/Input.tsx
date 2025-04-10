@@ -5,11 +5,20 @@ interface InputProps {
   type?: string;
   label?: string;
   value?: string;
+  placeholder?: string;
   maxLength?: number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-function Input({ label, type, name, value, onChange, maxLength }: InputProps) {
+function Input({
+  label,
+  type,
+  placeholder,
+  name,
+  value,
+  onChange,
+  maxLength,
+}: InputProps) {
   return (
     <div className="w-full relative bg-gray-800 rounded-lg pt-4 px-2">
       <input
@@ -17,8 +26,9 @@ function Input({ label, type, name, value, onChange, maxLength }: InputProps) {
         value={value}
         name={name}
         type={type}
+        placeholder={placeholder}
         onChange={onChange}
-        className="w-full pt-1 pb-1 text-sm inset-0 bg-gray-800 rounded-lg focus:outline-none"
+        className="w-full pt-1 text-white pb-1 text-sm inset-0 bg-gray-800 rounded-lg focus:outline-none"
       />
       <label
         className="absolute text-gray-300 text-[12px] flex top-1"

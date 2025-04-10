@@ -4,9 +4,10 @@ interface ButtonProps {
   onClick?: () => void;
   onSubmit?: () => void;
   children?: React.ReactNode;
+  type?: string;
 }
 
-function Button({ onClick, onSubmit, children }: ButtonProps) {
+function Button({ onClick, type, onSubmit, children }: ButtonProps) {
   return (
     <div className="w-full">
       <button

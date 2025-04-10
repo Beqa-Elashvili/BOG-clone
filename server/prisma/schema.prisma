@@ -60,12 +60,13 @@ model UserOffer {
 }
 
 model Transaction {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  balance   Int      @default(0)
-  points    Int      @default(0)
-  amount    Float
-  status    String
-  createdAt DateTime @default(now())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  balance     Int      @default(0)
+  points      Int      @default(0)
+  destination String
+  amount      Float
+  status      String
+  createdAt   DateTime @default(now())
 
   fromUserId String @db.ObjectId
   toUserId   String @db.ObjectId

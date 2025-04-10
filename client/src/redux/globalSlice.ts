@@ -22,8 +22,8 @@ export const globalSlice = createSlice({
     setIsUser: (state, action: PayloadAction<UserType | null>) => {
       state.isUser = action.payload;
     },
-    setIsUsers: (state, action: PayloadAction<UserType | null>) => {
-      state.isUser = action.payload;
+    setAllUsers: (state, action: PayloadAction<UserType[] | null>) => {
+      state.users = action.payload;
     },
     setIsRegisterForm: (state, action: PayloadAction<boolean>) => {
       state.isRegisterForm = action.payload;
@@ -34,7 +34,7 @@ export const globalSlice = createSlice({
   },
 });
 
-export const { setIsUser, setIsUsers, setIsRegisterForm, setActivateOffers } =
+export const { setIsUser, setAllUsers, setIsRegisterForm, setActivateOffers } =
   globalSlice.actions;
 
 export default globalSlice.reducer;

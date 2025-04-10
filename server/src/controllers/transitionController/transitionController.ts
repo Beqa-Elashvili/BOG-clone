@@ -5,7 +5,7 @@ export const createTransaction = async (
   req: Request,
   res: Response
 ): Promise<any> => {
-  const { fromUserId, toUserId, amount } = req.body;
+  const { fromUserId, toUserId, amount, destination } = req.body;
 
   if (!fromUserId || !toUserId || !amount) {
     return res
@@ -33,6 +33,7 @@ export const createTransaction = async (
       data: {
         amount,
         status: "completed",
+        destination: destination,
         fromUserId,
         toUserId,
       },

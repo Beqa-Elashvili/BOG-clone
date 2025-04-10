@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createTransaction = void 0;
 const prisma_1 = __importDefault(require("../../lib/prisma"));
 const createTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { fromUserId, toUserId, amount } = req.body;
+    const { fromUserId, toUserId, amount, destination } = req.body;
     if (!fromUserId || !toUserId || !amount) {
         return res
             .status(400)
@@ -38,6 +38,7 @@ const createTransaction = (req, res) => __awaiter(void 0, void 0, void 0, functi
             data: {
                 amount,
                 status: "completed",
+                destination: destination,
                 fromUserId,
                 toUserId,
             },
