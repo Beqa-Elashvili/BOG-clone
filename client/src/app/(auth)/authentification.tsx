@@ -28,7 +28,6 @@ function Authentification() {
   const [loadingRegistration, setLoadingRegistration] = useState(false);
 
   const user = useAppSelector((state) => state.global.isUser);
-  console.log(user);
 
   useEffect(() => {
     setMoveTop(false);
@@ -38,6 +37,14 @@ function Authentification() {
   }, [isRegister]);
 
   const ToggleForms = () => {
+    setIsValidEmail(false);
+    setUserValue({
+      name: "",
+      personalNumber: "",
+      phoneNumber: "",
+      email: "",
+      password: "",
+    });
     dispatch(setIsRegisterForm(!isRegister));
   };
 
@@ -155,36 +162,32 @@ function Authentification() {
       setLoadingLogin(true);
       setErrorMessage("");
       const user = await loginUser(userValue.email, userValue.password);
-      console.log("User logged in:", user);
       localStorage.setItem("token", user.token);
       await getProtectedData();
     } catch (error) {
-      setErrorMessage("Invalid email or password");
+      console.log(error);
     } finally {
       setLoadingLogin(false);
-      setErrorMessage("");
     }
   };
   const loginUser = async (email: string, password: string): Promise<any> => {
     try {
-      console.log("gaehsva");
       const response = await axios.post(`${url}/api/users/login`, {
         email,
         password,
       });
-      console.log(response.data);
       return response.data;
     } catch (error: any) {
       console.error(
         "Login failed:",
         error.response?.data?.error || error.message
       );
-      return null;
+      setErrorMessage("მომხმარებლის პაროლი არასწორია");
     }
   };
 
   return (
-    <div className="h-screen overflow-hidden">
+    <div className="min-h-screen overflow-hidden pb-12 ">
       {isRegister ? (
         <div className="bg-[#ff6022]">
           <img src="images/unnamed.webp" alt="BOG" />
@@ -217,6 +220,11 @@ function Authentification() {
                     type="text"
                     label="პაროლი"
                   />
+                  {errorMessage && (
+                    <div className="text-red-500 text-sm mt-2">
+                      ! {errorMessage}
+                    </div>
+                  )}
                   <Button onClick={handleLoginSubmit}>შემდეგი</Button>{" "}
                   <div>
                     <p className="text-[12px] text-center mt-8">
@@ -311,8 +319,9 @@ function Authentification() {
                       value={value}
                       type="number"
                       name="personalNumber"
+                      inputMode="none"
                       maxLength={11}
-                      label="პიდარი ნომერი"
+                      label="პირადი ნომერი"
                     />
                     {errorRegistration && (
                       <div className="text-red-500 text-sm mt-2">
@@ -343,6 +352,7 @@ function Authentification() {
                           type="phoneNumber"
                           maxLength={9}
                           name="phoneNumber"
+                          inputMode="none"
                           label="მობილურის ნომერი"
                         />
                         {errorRegistration && (
@@ -402,7 +412,7 @@ function Authentification() {
               )}
             </div>
             <div
-              className={` text-white  translate-y-0  p-4 px-4 transition-transform duration-1000 bg-gray-800 w-full min-h-screen h-full transform ${
+              className={` text-white ${userValue.phoneNumber && userValue.personalNumber && "hidden"}  translate-y-0  p-4 px-4 transition-transform duration-1000 bg-gray-800 w-full min-h-screen h-full transform ${
                 moveTop ? "translate-y-2" : "translate-y-40"
               }`}
             >

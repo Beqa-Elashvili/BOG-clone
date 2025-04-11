@@ -2,7 +2,7 @@
 import { useAppSelector } from "../redux";
 import { FaAngleLeft, FaChevronRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { Form, FormProps, Spin } from "antd";
+import { Form, FormProps, Select, Spin } from "antd";
 import Input from "../(Components)/Input";
 import axios from "axios";
 import { useState } from "react";
@@ -64,7 +64,7 @@ function page() {
   };
 
   return (
-    <div>
+    <div className="pb-12">
       <div className="p-2 flex items-center gap-4">
         <FaAngleLeft onClick={() => router.back()} className="cursor-pointer" />
         <h1 className="font-semibold">გადარიცხვები</h1>
@@ -101,12 +101,23 @@ function page() {
         </div>
       </div>
       <div className="bg-gray-800 text-white p-2">
+        <div className="border text-sm p-2 rounded-lg space-y-2">
+          <h1>დარეგისტრირებული მომხმარებლები</h1>
+          <Select defaultValue={users && users[0].personalNumber}>
+            {users?.map((item) => (
+              <Select.Option value={item.personalNumber}>
+                {item.personalNumber}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
         <Form
           name="basic"
           form={form}
           initialValues={{
             transferFrom: isUser?.personalNumber,
             username: isUser?.name,
+            destination: "პირადი გადარიცხვა",
             personalNumber: isUser?.personalNumber,
           }}
           onFinish={onFinish}

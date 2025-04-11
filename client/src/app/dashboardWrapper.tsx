@@ -11,9 +11,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { getProtectedData } = useGetProtectedData();
   const { isUser } = useAppSelector((state) => state.global);
   const pathname = usePathname();
-  // useEffect(() => {
-  //   getProtectedData();
-  // }, []);
+  useEffect(() => {
+    getProtectedData();
+  }, []);
 
   return (
     <div className="w-full  bg-black flex justify-center">
@@ -26,7 +26,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <Header />
         </div>
         <main>{children}</main>
-        <Footer />
+        <div className="fixed z-20 w-full bottom-0">
+          <Footer />
+        </div>
       </div>
     </div>
   );

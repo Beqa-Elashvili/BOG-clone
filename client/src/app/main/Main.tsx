@@ -13,6 +13,7 @@ import { CiCircleCheck } from "react-icons/ci";
 import { Spin } from "antd";
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import useGetActivateOffers from "../hooks/getActivateOffers/useGetActivateOffers";
+import Input from "../(Components)/Input";
 
 function page() {
   const [stories, setStories] = React.useState<storyTypes[]>([]);
@@ -44,14 +45,15 @@ function page() {
   }, [storyId]);
 
   const getInfo = async () => {
+    console.log("gaeshva");
     const resp = await axios.get(`${url}/api/story/stories`);
+    setStories(resp.data);
     const OfferResp = await axios.get(`${url}/api/offers/offers`);
+    setOffers(OfferResp.data);
     const transactionsResp = await axios.get(
       `${url}/api/transaction/transaction/${isUser?.id}`
     );
     setTransactions(transactionsResp.data.transactions);
-    setStories(resp.data);
-    setOffers(OfferResp.data);
     await getActiveOffer();
   };
 
@@ -98,7 +100,7 @@ function page() {
   if (storyId) {
     const story = stories.find((item) => item.id === storyId);
     return (
-      <div className="absolute z-10  inset-0 text-center bg-black w-full h-full ">
+      <div className="absolute z-30  pointer-events-none inset-0 text-center bg-black w-full h-full ">
         <img
           className="h-full w-full  object-cover"
           src={story?.imageUrl}
@@ -205,7 +207,7 @@ function page() {
     }).format(date);
     return (
       <div className="absolute z-10  inset-0 text-center bg-black w-full h-full">
-        <div className="bg-gray-800 space-y-2 p-2">
+        <div className="bg-gray-800 rounded-b-lg space-y-2 p-2">
           <div className="flex gap-4 items-center">
             <FaAngleLeft
               className="cursor-pointer"
@@ -222,6 +224,63 @@ function page() {
             ) : (
               <h1>{transition?.amount} ₾</h1>
             )}
+          </div>
+        </div>
+        <div className="bg-gray-800 text-start rounded-lg space-y-2 p-2 mt-4">
+          <h1 className="text-lg font-semibold">საიდან</h1>
+          <div>
+            <Input
+              label="პირადი ნომერი"
+              readonly={true}
+              value={"***" + transition?.fromUser.personalNumber.slice(-4)}
+            />
+            <hr />
+            <Input
+              label="მობილურის ნომერი"
+              readonly={true}
+              value={"***" + transition?.fromUser.phoneNumber.slice(-4)}
+            />
+            <hr />
+            <Input
+              label="საბუთის ნომერი"
+              readonly={true}
+              value={transition?.id}
+            />
+          </div>
+        </div>
+        <div className="bg-gray-800 pb-14 text-start space-y-2 p-2 mt-4">
+          <h1 className="font-semibold text-lg">სად</h1>
+          <div>
+            <Input
+              label="ობიექტი"
+              readonly={true}
+              value={transition?.toUser.name}
+            />
+            <hr />
+            <Input
+              label="აღწერა"
+              readonly={true}
+              value={
+                "ობიექტი " +
+                transition?.toUser.name +
+                ".თარიღი " +
+                formDate +
+                ".თანხა " +
+                transition?.amount
+              }
+            />
+            <hr />
+            <Input
+              label="თანხა"
+              readonly={true}
+              value={
+                transition?.fromUser.id === isUser?.id
+                  ? ` -${transition?.amount.toString()} ₾`
+                  : ` ${transition?.amount} ₾`
+              }
+            />
+            <hr />
+            <Input label="გადახდის თარიღი" readonly={true} value={formDate} />
           </div>
         </div>
       </div>
@@ -250,9 +309,8 @@ function page() {
 
   const formattedDate = `${day} ${month.slice(0, 3)}, ${year}`;
 
-  console.log(transactions);
   return (
-    <div className="p-2 flex flex-col gap-2 w-full">
+    <div className="p-2 pb-12 flex flex-col gap-2 w-full">
       <Carousel
         slidesToScroll={2}
         centerPadding="30px 0px 0px 0px"

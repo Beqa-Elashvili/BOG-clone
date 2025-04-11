@@ -6,6 +6,8 @@ interface InputProps {
   label?: string;
   value?: string;
   placeholder?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  readonly?: boolean;
   maxLength?: number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
@@ -16,6 +18,8 @@ function Input({
   placeholder,
   name,
   value,
+  inputMode,
+  readonly,
   onChange,
   maxLength,
 }: InputProps) {
@@ -24,6 +28,8 @@ function Input({
       <input
         maxLength={maxLength}
         value={value}
+        readOnly={readonly}
+        inputMode={inputMode}
         name={name}
         type={type}
         placeholder={placeholder}
