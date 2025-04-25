@@ -10,10 +10,7 @@ const router = Router();
 
 router.post("/register", createUser);
 router.post("/login", loginUser);
-router.get("/email/:email", getUser);
-router.get("/userId/:userId", getUser);
-router.get("/personalNumber/:personalNumber", getUser);
-router.get("/users", getUser);
+router.get("/id/:email", getUser);
 
 router.get("/protectedRoute", authenticateToken, (req, res) => {
   res.json({

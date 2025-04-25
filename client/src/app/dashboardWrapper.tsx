@@ -1,35 +1,27 @@
 "use client";
 
 import React, { useEffect } from "react";
-import StoreProvider, { useAppSelector } from "./redux";
+import StoreProvider from "./redux";
+import useGetProtectedData from "./hooks/useGetPotectedData/useGetProtectedData";
 import Header from "./components/header";
 import Footer from "./components/footer";
-import { usePathname } from "next/navigation";
-import useGetProtectedData from "./hooks/useGetPotectedData/useGetProtectedData";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { getProtectedData } = useGetProtectedData();
-  const { isUser } = useAppSelector((state) => state.global);
-  const pathname = usePathname();
+
   useEffect(() => {
     getProtectedData();
   }, []);
 
   return (
-    <div className="w-full  bg-black flex justify-center">
-      <div className="min-w-[375px] max-w-[430px] relative bg-gray-900 text-white  h-full min-h-screen">
-        <div
-          className={`${
-            isUser && pathname !== "/transaction" ? "block" : "hidden"
-          }`}
-        >
-          <Header />
-        </div>
-        <main>{children}</main>
-        <div className="fixed z-20 w-full bottom-0">
-          <Footer />
-        </div>
+    <div className="w-full h-full">
+      <div className="sticky top-0 z-20 bg-white max-w-[1080px] m-auto">
+        <Header />
       </div>
+      <main className="h-full  min-h-screen max-w-[1080px] m-auto">
+        {children}
+      </main>
+      <Footer />
     </div>
   );
 };

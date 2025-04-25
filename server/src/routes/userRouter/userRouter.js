@@ -5,10 +5,7 @@ const usersController_1 = require("../../controllers/usersController/usersContro
 const router = (0, express_1.Router)();
 router.post("/register", usersController_1.createUser);
 router.post("/login", usersController_1.loginUser);
-router.get("/email/:email", usersController_1.getUser);
-router.get("/userId/:userId", usersController_1.getUser);
-router.get("/personalNumber/:personalNumber", usersController_1.getUser);
-router.get("/users", usersController_1.getUser);
+router.get("/id/:email", usersController_1.getUser);
 router.get("/protectedRoute", usersController_1.authenticateToken, (req, res) => {
     res.json({
         message: "This is protected data",

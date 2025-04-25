@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import prisma from "../../lib/prisma"; // Adjust the import based on your project structure
+import prisma from "../../lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -10,16 +10,16 @@ const generateToken = (userId: string) => {
 };
 
 export const createUser = async (req: Request, res: Response): Promise<any> => {
-  const { email, password, name, phoneNumber, personalNumber } = req.body;
+  const { email, password, name, phoneNumber } = req.body;
 
-  if (!email || !password || !name || !phoneNumber || !personalNumber) {
+  if (!email || !password || !name || !phoneNumber) {
     return res.status(400).json({ error: "All fields are required" });
   }
 
   try {
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [{ email }, { phoneNumber }, { personalNumber }],
+        OR: [{ email }, { phoneNumber }],
       },
     });
 
@@ -38,23 +38,17 @@ export const createUser = async (req: Request, res: Response): Promise<any> => {
         password: hashedPassword,
         name,
         phoneNumber,
-        personalNumber,
-        balance: 55000,
-        points: 17500,
       },
     });
 
-    const token = generateToken(user.id);
+    const token = generateToken(user.id as unknown as string);
 
     return res.status(201).json({
       id: user.id,
       email: user.email,
       name: user.name,
       phoneNumber: user.phoneNumber,
-      personalNumber: user.personalNumber,
       createdAt: user.createdAt,
-      balance: user.balance,
-      points: user.points,
       token,
     });
   } catch (error) {
@@ -86,14 +80,13 @@ export const loginUser = async (req: Request, res: Response): Promise<any> => {
       return res.status(400).json({ error: "Invalid email or password" });
     }
 
-    const token = generateToken(user.id);
+    const token = generateToken(user.id as unknown as string);
 
     return res.status(200).json({
       id: user.id,
       email: user.email,
       name: user.name,
       phoneNumber: user.phoneNumber,
-      personalNumber: user.personalNumber,
       createdAt: user.createdAt,
       token,
     });
@@ -102,11 +95,12 @@ export const loginUser = async (req: Request, res: Response): Promise<any> => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 export const getUser = async (req: Request, res: Response): Promise<any> => {
-  const { email, userId, personalNumber } = req.params;
+  const { id } = req.params;
   const { all } = req.query;
 
-  if (!email && !userId && !personalNumber && all !== "true") {
+  if (!id && all !== "true") {
     return res.status(400).json({
       error:
         "At least one parameter (email, userId, or personalNumber) is required",
@@ -114,30 +108,9 @@ export const getUser = async (req: Request, res: Response): Promise<any> => {
   }
 
   try {
-    let user;
-    if (all === "true") {
-      user = await prisma.user.findMany({});
-    }
-    if (email) {
-      user = await prisma.user.findUnique({
-        where: { email },
-      });
-    } else if (userId) {
-      user = await prisma.user.findUnique({
-        where: { id: userId },
-      });
-    } else if (personalNumber) {
-      user = await prisma.user.findUnique({
-        where: { personalNumber },
-      });
-    }
-
-    if (Array.isArray(user)) {
-      const userData = user.map(
-        ({ password, balance, points, ...rest }) => rest
-      );
-      return res.status(200).json(userData);
-    }
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });

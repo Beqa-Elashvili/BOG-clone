@@ -1,446 +1,285 @@
 "use client";
 
-import React from "react";
-import { useState, useEffect } from "react";
-import Button from "../(Components)/Button";
-import Input from "../(Components)/Input";
-import { Checkbox } from "antd";
-import { IoClose } from "react-icons/io5";
-import { FaDeleteLeft } from "react-icons/fa6";
-import { CiUser } from "react-icons/ci";
-
-import { useAppDispatch, useAppSelector } from "../redux";
+import React, { useEffect, useState } from "react";
+import { Eye, EyeOff, X } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { setIsRegisterForm } from "@/redux/globalSlice";
 import axios from "axios";
-import useGetProtectedData from "../hooks/useGetPotectedData/useGetProtectedData";
+import { Button, Form, Input } from "antd";
+import { useRouter } from "next/navigation";
+import { setIsAuthModalOpen } from "@/redux/globalSlice";
+import { FieldValues, SubmitHandler } from "react-hook-form";
+function Register() {
+  const [showPassword, setShowPassword] = useState({
+    password: false,
+    repeatPassword: false,
+  });
+  const [loading, setLoading] = useState<boolean>(false);
 
-function Authentification() {
-  const [moveTop, setMoveTop] = useState(false);
   const dispatch = useAppDispatch();
-  const { getProtectedData } = useGetProtectedData();
-  const url = process.env.NEXT_PUBLIC_API_BASE_URL;
-  const isRegister = useAppSelector((state) => state.global.isRegisterForm);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [loadingLogin, setLoadingLogin] = useState(false);
-  const [errorRegistration, setErrorRegistration] = useState<string | null>(
-    null
-  );
-  const [loadingRegistration, setLoadingRegistration] = useState(false);
-
-  const user = useAppSelector((state) => state.global.isUser);
+  const isRegisterForm = useAppSelector((state) => state.global.isRegisterForm);
 
   useEffect(() => {
-    setMoveTop(false);
-    setTimeout(() => {
-      setMoveTop(true);
-    }, 2000);
-  }, [isRegister]);
-
-  const ToggleForms = () => {
-    setIsValidEmail(false);
-    setUserValue({
-      name: "",
-      personalNumber: "",
-      phoneNumber: "",
-      email: "",
-      password: "",
-    });
-    dispatch(setIsRegisterForm(!isRegister));
-  };
-
-  const [numbers, setNumbers] = useState([
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    0,
-    <FaDeleteLeft />,
-  ]);
-
-  const [value, setValue] = useState("");
-
-  const handleClick = (key: keyof typeof userValue, number: any) => {
-    if (number.type === FaDeleteLeft) {
-      setValue(value.slice(0, -1));
-    } else {
-      setValue(value + number);
+    if (status === "authenticated") {
+      dispatch(setIsAuthModalOpen(false));
     }
-  };
+  }, [status]);
 
-  const handleRegister = (kay: any, value: any) => {
-    if (kay === "personalNumber" || kay === "phoneNumber") {
-      setErrorRegistration(null);
-      handleClick(kay, value);
-    } else {
-      setValue(value);
-    }
-  };
+  const [form] = Form.useForm();
 
-  const [userValue, setUserValue] = useState({
-    name: "",
-    personalNumber: "",
-    phoneNumber: "",
-    email: "",
-    password: "",
-  });
+  const router = useRouter();
 
-  const [isValidEmail, setIsValidEmail] = useState(false);
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    const { phoneNumber, password, repeatPassword, email } = data;
 
-  const handleUser = async () => {
     try {
-      const resp = await axios.get(`${url}/api/users/email/${userValue.email}`);
-      setUserValue((prev) => ({
-        ...prev,
-        personalNumber: resp.data.personalNumber,
-        name: resp.data.name,
-        phoneNumber: resp.data.phoneNumber,
-      }));
-      setIsValidEmail(true);
-      setErrorMessage("");
-    } catch (error) {
-      setIsValidEmail(false);
-      setErrorMessage("მომხმარებელი ვერ მოიძებნა");
-      return;
+      setLoading(true);
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(email)) {
+        form.setFields([
+          {
+            name: "email",
+            errors: ["გთხოვთ შეიყვანოთ ვალიდური მეილი!"],
+          },
+        ]);
+        return;
+      }
+      if (phoneNumber.length !== 9) {
+        form.setFields([
+          {
+            name: "phoneNumber",
+            errors: ["ნომერი უნდა შედგებოდეს 9 რიცხვისაგან"],
+          },
+        ]);
+        return;
+      }
+      if (password !== repeatPassword) {
+        form.setFields([
+          {
+            name: "repeatPassword",
+            errors: ["შეყვანილი პაროლები არ ემთხვევა ერთმანეთს!"],
+          },
+        ]);
+        return;
+      }
+
+      await axios.post("/api/register", {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        phoneNumber: data.phoneNumber,
+      });
+
+      setLoading(false);
+      dispatch(setIsRegisterForm(false));
+
+      setLoading(false);
+    } catch (error: any) {
+    } finally {
+      setLoading(false);
     }
   };
-
-  const handleValues = (kay: any, value: any) => {
-    if (kay === "personalNumber" && value.length !== 11) {
-      setErrorRegistration("პირადი ნომერი უნდა შეიცავდეს 11 ციფრს");
-      return;
-    }
-    if (kay === "phoneNumber" && value.length !== 9) {
-      setErrorRegistration("მობილური ნომერი უნდა შეიცავდეს 9 ციფრს");
-      return;
-    } else {
-      setErrorRegistration(null);
-      setUserValue((prev) => ({
-        ...prev,
-        [kay]: value,
-      }));
-      setValue("");
-    }
-  };
-
-  const handleUserValues = (kay: string, value: string) => {
-    setUserValue((prev) => ({
+  const togglePasswordVisibility = (field: "password" | "repeatPassword") => {
+    setShowPassword((prev) => ({
       ...prev,
-      [kay]: value,
+      [field]: !prev[field],
     }));
   };
 
-  const handleSubmit = async () => {
-    setLoadingRegistration(true);
-    setErrorRegistration(null);
-
-    try {
-      const response = await axios.post(`${url}/api/users/register`, userValue);
-      await handleLoginSubmit();
-      console.log("User created:", response.data);
-    } catch (err: any) {
-      console.error(err);
-      setUserValue({
-        name: "",
-        personalNumber: "",
-        phoneNumber: "",
-        email: "",
-        password: "",
-      });
-      setErrorRegistration(err.response?.data?.error || "An error occurred");
-    } finally {
-      setLoadingRegistration(false);
-    }
-  };
-
-  const handleLoginSubmit = async () => {
-    try {
-      setLoadingLogin(true);
-      setErrorMessage("");
-      const user = await loginUser(userValue.email, userValue.password);
-      localStorage.setItem("token", user.token);
-      await getProtectedData();
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoadingLogin(false);
-    }
-  };
-  const loginUser = async (email: string, password: string): Promise<any> => {
-    try {
-      const response = await axios.post(`${url}/api/users/login`, {
-        email,
-        password,
-      });
-      return response.data;
-    } catch (error: any) {
-      console.error(
-        "Login failed:",
-        error.response?.data?.error || error.message
-      );
-      setErrorMessage("მომხმარებლის პაროლი არასწორია");
+  const toggleIsRegisterForm = (value: string) => {
+    if (value === "LOGIN") {
+      dispatch(setIsRegisterForm(false));
+    } else {
+      dispatch(setIsRegisterForm(true));
     }
   };
 
   return (
-    <div className="min-h-screen overflow-hidden pb-12 ">
-      {isRegister ? (
-        <div className="bg-[#ff6022]">
-          <img src="images/unnamed.webp" alt="BOG" />
+    <div className="w-full  flex flex-col items-center justify-center">
+      <div className="ring ring-cyan-500 relative bg-white py-2  mx-4 px-4 z-30 w-full   m-auto shadow-custom-light rounded-lg flex flex-col items-center justify-center h-full">
+        <div
+          onClick={() => dispatch(setIsAuthModalOpen(false))}
+          className="bg-white cursor-pointer z-50 w-8 h-8 rounded-full flex items-center justify-center absolute -top-9 -right-2"
+        >
+          <X />
+        </div>
+        {!isRegisterForm ? (
+          <h1 className="text-3xl font-bold mb-8">გაიარე ავტორიზაცია</h1>
+        ) : (
+          <h1 className="text-3xl font-bold mb-8">შექმენი ანგარიში</h1>
+        )}
+        <div className="font-bold   text-md m-auto  md:text-xl flex items-center justify-between gap-8">
           <div
-            className={` text-white translate-y-0 p-4 px-4 transition-transform rounded-t-2xl  duration-1000 bg-black w-full min-h-screen h-full transform ${
-              moveTop ? "translate-y-0" : "translate-y-40"
-            }`}
+            onClick={() => toggleIsRegisterForm("LOGIN")}
+            className={`${
+              !isRegisterForm ? "text-black" : "text-gray-500"
+            }  w-5/6 text-center cursor-pointer`}
           >
-            {isValidEmail || user ? (
-              <div>
-                <div className="flex items-center gap-2">
-                  <CiUser className="text-2xl" />
-                  <div>
-                    <p className=" text-sm text-gray-400">მომხმარებელი</p>
-                    <h1 className="font-semibold">
-                      {userValue.name || user?.name}
-                    </h1>
-                  </div>
-                </div>
-                <div className="mt-8 flex flex-col gap-4">
-                  <Input
-                    onChange={(e) =>
-                      setUserValue((prev) => ({
-                        ...prev,
-                        password: e.target.value,
-                      }))
-                    }
-                    value={userValue.password}
-                    name="password"
-                    type="text"
-                    label="პაროლი"
-                  />
-                  {errorMessage && (
-                    <div className="text-red-500 text-sm mt-2">
-                      ! {errorMessage}
-                    </div>
-                  )}
-                  <Button onClick={handleLoginSubmit}>შემდეგი</Button>{" "}
-                  <div>
-                    <p className="text-[12px] text-center mt-8">
-                      არ ხარ დარეგსტრირებული?
-                    </p>
-                    <button
-                      onClick={ToggleForms}
-                      className="w-full cursor-pointer text-center mt-2 backdrop-opacity-95 bg-orange-700 bg-opacity-50  p-2 rounded-lg font-semibold text-sm transition duration-200"
-                    >
-                      რეგისტრაცია
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="flex flex-col gap-2 justify-start">
-                  <h1 className="font-semibold">შესვლა</h1>
-                  <Input
-                    onChange={(e) =>
-                      setUserValue((prev) => ({
-                        ...prev,
-                        email: e.target.value,
-                      }))
-                    }
-                    value={userValue.email}
-                    name="name"
-                    type="text"
-                    label="მომხმარებლის მეილი"
-                  />
-                </div>
-                {errorMessage && (
-                  <div className="text-red-500 text-sm mt-2">
-                    ! {errorMessage}
-                  </div>
-                )}
-                <div className="flex justify-center mt-8 items-center gap-2">
-                  <Checkbox />
-                  <p className="text-sm">მომხმარებლის დამახსოვრება</p>
-                </div>
-                <div className="mt-2">
-                  <Button onClick={handleUser}>შემდეგი</Button>
-                </div>
-                <div>
-                  <p className="text-[12px] text-center mt-8">
-                    არ ხარ დარეგსტრირებული?
-                  </p>
-                </div>
-                <button
-                  onClick={ToggleForms}
-                  className="w-full cursor-pointer text-center mt-2 backdrop-opacity-95 bg-orange-700 bg-opacity-50  p-2 rounded-lg font-semibold text-sm transition duration-200"
-                >
-                  რეგისტრაცია
-                </button>
-              </>
-            )}
+            <h1>ავტორიზაცია</h1>
+            <hr className="mt-2" />
+          </div>
+          <div className="h-8 w-px  bg-gray-200" />
+          <div
+            onClick={() => toggleIsRegisterForm("")}
+            className={`${
+              isRegisterForm ? "text-black" : "text-gray-500"
+            }  w-5/6 text-center cursor-pointer`}
+          >
+            <h1>რეგისტრაცია</h1>
+            <hr className="mt-2" />
           </div>
         </div>
-      ) : (
-        <>
-          <div className=" bg-gray-900  h-screen  w-full text-white">
-            <div className="p-4">
-              <div className="flex w-full justify-between">
-                <h1 className="w-full font-semibold">რეგისტრაცია</h1>
-                <IoClose
-                  onClick={() => {
-                    dispatch(setIsRegisterForm(true));
-                    setUserValue({
-                      name: "",
-                      personalNumber: "",
-                      phoneNumber: "",
-                      email: "",
-                      password: "",
-                    });
-                    setValue("");
-                  }}
-                  className="text-white p-1 cursor-pointer bg-gray-800 h-8 w-8 rounded-full "
-                />
-              </div>
-              {!userValue.personalNumber ? (
-                <>
-                  <div className="p-12 rounded-lg">
-                    <img
-                      className="w-[430px] h-40 object-contain rounded-xl"
-                      src="images/idCard.jpg"
-                      alt="idCard"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <Input
-                      value={value}
-                      type="number"
-                      name="personalNumber"
-                      inputMode="none"
-                      maxLength={11}
-                      label="პირადი ნომერი"
-                    />
-                    {errorRegistration && (
-                      <div className="text-red-500 text-sm mt-2">
-                        ! {errorRegistration}
-                      </div>
-                    )}
-                    <Button
-                      onClick={() => handleValues("personalNumber", value)}
+        <div className="w-full mt-4">
+          <Form form={form} onFinish={onSubmit} className="flex flex-col gap-">
+            {isRegisterForm ? (
+              <>
+                <Form.Item
+                  name="name"
+                  rules={[
+                    {
+                      required: true,
+                      message: "გთხოვთ შეიყვანოთ სახელი, გვარი!",
+                    },
+                  ]}
+                >
+                  <Input
+                    name="name"
+                    className="py-2"
+                    required
+                    type="text"
+                    placeholder="სახელი, გვარი"
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="email"
+                  rules={[
+                    { required: true, message: "გთხოვთ შეიყვანოთ მეილი!" },
+                  ]}
+                >
+                  <Input
+                    name="email"
+                    className="py-2"
+                    required
+                    placeholder="მეილი"
+                    type="text"
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="phoneNumber"
+                  rules={[
+                    {
+                      required: true,
+                      message: "გთხოვთ შეიყვანოთ მობილურის ნომერი!",
+                    },
+                  ]}
+                >
+                  <Input
+                    name="phoneNumber"
+                    className="py-2"
+                    required
+                    maxLength={9}
+                    placeholder="მობილურის ნომერი"
+                    type="number"
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="password"
+                  rules={[
+                    { required: true, message: "გთხოვთ შეიყვანოთ პაროლი!" },
+                  ]}
+                >
+                  <div className="relative flex items-center">
+                    <div className="w-full">
+                      <Input
+                        className="py-2"
+                        name="password"
+                        placeholder="პაროლი"
+                        type={showPassword.password ? "text" : "password"}
+                      />
+                    </div>
+                    <span
+                      onClick={() => togglePasswordVisibility("password")}
+                      className="text-gray-500 absolute right-2 cursor-pointer"
                     >
-                      შემდეგი
-                    </Button>
+                      {showPassword.password ? <EyeOff /> : <Eye />}
+                    </span>
                   </div>
-                </>
-              ) : (
-                <>
-                  {userValue.personalNumber && !userValue.phoneNumber ? (
-                    <>
-                      <div className="p-12 rounded-lg">
-                        <img
-                          className="w-[430px] h-40 object-contain rounded-xl"
-                          src="images/mobile-png.webp"
-                          alt="mobile"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Input
-                          value={value}
-                          type="phoneNumber"
-                          maxLength={9}
-                          name="phoneNumber"
-                          inputMode="none"
-                          label="მობილურის ნომერი"
-                        />
-                        {errorRegistration && (
-                          <div className="text-red-500 text-sm mt-2">
-                            ! {errorRegistration}
-                          </div>
-                        )}
-                        <Button
-                          onClick={() => handleValues("phoneNumber", value)}
-                        >
-                          შემდეგი
-                        </Button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="rounded-lg">
-                        <img
-                          className=" w-[430px] h-40 object-contain rounded-xl"
-                          src="images/userAuth.webp"
-                          alt="idCard"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Input
-                          value={userValue.name}
-                          type="text"
-                          name="name"
-                          onChange={(e) =>
-                            handleUserValues("name", e.target.value)
-                          }
-                          label="მომხმარებლის სახელი"
-                        />
-                        <Input
-                          value={userValue.email}
-                          type="text"
-                          onChange={(e) =>
-                            handleUserValues("email", e.target.value)
-                          }
-                          name="email"
-                          label="მეილი"
-                        />
-                        <Input
-                          value={userValue.password}
-                          type="password"
-                          name="password"
-                          onChange={(e) =>
-                            handleUserValues("password", e.target.value)
-                          }
-                          label="პაროლი"
-                        />
-                        <Button onClick={handleSubmit}>ანგარიშის შექმნა</Button>
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-            <div
-              className={` text-white ${userValue.phoneNumber && userValue.personalNumber && "hidden"}  translate-y-0  p-4 px-4 transition-transform duration-1000 bg-gray-800 w-full min-h-screen h-full transform ${
-                moveTop ? "translate-y-2" : "translate-y-40"
-              }`}
-            >
-              <div className="grid grid-cols-3 gap-2 justify-center items-center">
-                {numbers.map((number, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleRegister("personalNumber", number)}
-                    className={`h-10 hover:bg-gray-700 cursor-pointer bg-gray-600 w-full rounded-lg flex justify-center items-center text-xl font-semibold ${
-                      index === numbers.length - 1
-                        ? "col-span-1 justify-center"
-                        : ""
-                    } ${
-                      index === numbers.length - 1
-                        ? "col-span-2 justify-center"
-                        : ""
-                    }`}
-                  >
-                    {number}
+                </Form.Item>
+                <Form.Item
+                  name="repeatPassword"
+                  rules={[
+                    { required: true, message: "გთხოვთ გაიმეოროთ პაროლი!" },
+                  ]}
+                >
+                  <div className="relative flex items-center">
+                    <div className="w-full">
+                      <Input
+                        className="py-2"
+                        name="repeatPassword"
+                        placeholder="გაიმეორე პაროლი"
+                        type={showPassword.repeatPassword ? "text" : "password"}
+                      />
+                    </div>
+                    <span
+                      onClick={() => togglePasswordVisibility("repeatPassword")}
+                      className="text-gray-500 absolute right-2 cursor-pointer"
+                    >
+                      {showPassword.repeatPassword ? <EyeOff /> : <Eye />}
+                    </span>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+                </Form.Item>
+              </>
+            ) : (
+              <>
+                <Form.Item
+                  name="email"
+                  rules={[
+                    { required: true, message: "გთხოვთ შეიყვანოთ მეილი!" },
+                  ]}
+                >
+                  <Input
+                    name="email"
+                    required
+                    className="py-2"
+                    placeholder="მეილი"
+                    type="text"
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="password"
+                  rules={[
+                    { required: true, message: "გხოვთ შეიყვანოთ პაროლი!" },
+                  ]}
+                >
+                  <div className="relative flex items-center">
+                    <div className="w-full">
+                      <Input
+                        name="password"
+                        className="py-2"
+                        placeholder="პაროლი"
+                        type={showPassword.password ? "text" : "password"}
+                      />
+                    </div>
+                    <span
+                      onClick={() => togglePasswordVisibility("password")}
+                      className="text-gray-500 absolute right-2 cursor-pointer"
+                    >
+                      {showPassword.password ? <EyeOff /> : <Eye />}
+                    </span>
+                  </div>
+                </Form.Item>
+              </>
+            )}
+            <hr className="mb-4" />
+
+            <Button className="bg-black text-white  flex gap-2 justify-center  text-center font-semibold w-full focus:outline-none ring-1 rounded-md px-2 py-4 hover:ring-cyan-600  focus:ring-2 duration-300 transition">
+              შესვლა
+            </Button>
+          </Form>
+        </div>
+      </div>
     </div>
   );
 }
 
-export default Authentification;
+export default Register;

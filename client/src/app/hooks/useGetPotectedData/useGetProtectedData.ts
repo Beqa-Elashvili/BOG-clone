@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useAppDispatch } from "@/app/redux";
-import { setIsUser, setAllUsers } from "@/redux/globalSlice";
+import { setIsUser } from "@/redux/globalSlice";
 
 const useGetProtectedData = () => {
   const url = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -9,9 +9,7 @@ const useGetProtectedData = () => {
   const handleUser = async (userId: string) => {
     try {
       const resp = await axios.get(`${url}/api/users/userId/${userId}`);
-      const UsersResp = await axios.get(`${url}/api/users/users?all=true`);
       dispatch(setIsUser(resp.data));
-      dispatch(setAllUsers(UsersResp.data));
     } catch (error) {
       console.log(error);
       dispatch(setIsUser(null));

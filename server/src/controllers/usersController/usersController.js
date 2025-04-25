@@ -24,7 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticateToken = exports.getUser = exports.loginUser = exports.createUser = void 0;
-const prisma_1 = __importDefault(require("../../lib/prisma")); // Adjust the import based on your project structure
+const prisma_1 = __importDefault(require("../../lib/prisma"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
@@ -32,14 +32,14 @@ const generateToken = (userId) => {
     return jsonwebtoken_1.default.sign({ userId }, JWT_SECRET, { expiresIn: "1h" });
 };
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, password, name, phoneNumber, personalNumber } = req.body;
-    if (!email || !password || !name || !phoneNumber || !personalNumber) {
+    const { email, password, name, phoneNumber } = req.body;
+    if (!email || !password || !name || !phoneNumber) {
         return res.status(400).json({ error: "All fields are required" });
     }
     try {
         const existingUser = yield prisma_1.default.user.findFirst({
             where: {
-                OR: [{ email }, { phoneNumber }, { personalNumber }],
+                OR: [{ email }, { phoneNumber }],
             },
         });
         if (existingUser) {
@@ -54,9 +54,6 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 password: hashedPassword,
                 name,
                 phoneNumber,
-                personalNumber,
-                balance: 55000,
-                points: 17500,
             },
         });
         const token = generateToken(user.id);
@@ -65,10 +62,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             email: user.email,
             name: user.name,
             phoneNumber: user.phoneNumber,
-            personalNumber: user.personalNumber,
             createdAt: user.createdAt,
-            balance: user.balance,
-            points: user.points,
             token,
         });
     }
@@ -102,7 +96,6 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             email: user.email,
             name: user.name,
             phoneNumber: user.phoneNumber,
-            personalNumber: user.personalNumber,
             createdAt: user.createdAt,
             token,
         });
@@ -114,40 +107,17 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.loginUser = loginUser;
 const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, userId, personalNumber } = req.params;
+    const { id } = req.params;
     const { all } = req.query;
-    if (!email && !userId && !personalNumber && all !== "true") {
+    if (!id && all !== "true") {
         return res.status(400).json({
             error: "At least one parameter (email, userId, or personalNumber) is required",
         });
     }
     try {
-        let user;
-        if (all === "true") {
-            user = yield prisma_1.default.user.findMany({});
-        }
-        if (email) {
-            user = yield prisma_1.default.user.findUnique({
-                where: { email },
-            });
-        }
-        else if (userId) {
-            user = yield prisma_1.default.user.findUnique({
-                where: { id: userId },
-            });
-        }
-        else if (personalNumber) {
-            user = yield prisma_1.default.user.findUnique({
-                where: { personalNumber },
-            });
-        }
-        if (Array.isArray(user)) {
-            const userData = user.map((_a) => {
-                var { password, balance, points } = _a, rest = __rest(_a, ["password", "balance", "points"]);
-                return rest;
-            });
-            return res.status(200).json(userData);
-        }
+        const user = yield prisma_1.default.user.findUnique({
+            where: { id },
+        });
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
